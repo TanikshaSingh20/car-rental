@@ -1,9 +1,9 @@
-import React from "react";
+
 import Title from "./Title";
 import { assets } from "../assets/assets";
 import CarCard from "./CarCard";
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext } from "../context/useAppContext";
 import { motion } from "motion/react";
 
 const FeaturedSection = () => {

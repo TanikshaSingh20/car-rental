@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { assets } from '../../assets/assets';
 import Title from '../../components/owner/Title';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from '../../context/useAppContext';
 import toast from 'react-hot-toast';
 
 const ManageCars = () => {
@@ -65,8 +65,24 @@ const ManageCars = () => {
 
 
   useEffect(() => {
-    isOwner && fetchOwnerCars();
-  }, [isOwner]);
+    if (!isOwner) return;
+
+    let active = true;
+    axios.get('/api/owner/cars').then(({ data }) => {
+      if (!active) return;
+      if (data.success) {
+        setCars(data.cars);
+      } else {
+        toast.error(data.message);
+      }
+    }).catch((error) => {
+      if (active) toast.error(error.message);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [axios, isOwner]);
 
   return (
     <div className="px-4 pt-10 md:px-10 w-full">

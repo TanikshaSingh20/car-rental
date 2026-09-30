@@ -1,17 +1,16 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AppContext from "./AppContext";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
-
-export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY;
 
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [user, setUser] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -52,17 +51,38 @@ export const AppProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    setToken(savedToken);
-    fetchCars();
+    axios.get("/api/user/cars").then(({ data }) => {
+      data.success ? setCars(data.cars) : toast.error(data.message);
+    }).catch((error) => {
+      toast.error(error.message);
+    });
   }, []);
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = `${token}`;
-      fetchUser();
+    if (!token) {
+      delete axios.defaults.headers.common["Authorization"];
+      return;
     }
-  }, [token]);
+
+    axios.defaults.headers.common["Authorization"] = token;
+    let active = true;
+
+    axios.get("/api/user/data").then(({ data }) => {
+      if (!active) return;
+      if (data.success) {
+        setUser(data.user);
+        setIsOwner(data.user.role === "owner");
+      } else {
+        navigate("/");
+      }
+    }).catch((error) => {
+      if (active) toast.error(error.message);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [navigate, token]);
 
   const value = {
     navigate,
@@ -92,8 +112,4 @@ export const AppProvider = ({ children }) => {
       {children}
     </AppContext.Provider>
   );
-};
-
-export const useAppContext = () => {
-  return useContext(AppContext);
 };

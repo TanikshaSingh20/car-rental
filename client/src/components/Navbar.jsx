@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { assets } from '../assets/assets'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAppContext } from '../context/AppContext'
+import { useAppContext } from '../context/useAppContext'
 import { toast } from "react-hot-toast";
 import {motion} from 'motion/react'
 const menuLinks = [

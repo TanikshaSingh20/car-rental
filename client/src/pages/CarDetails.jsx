@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 
 import { assets } from "../assets/assets";
 import Loader from "../components/Loader";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext } from "../context/useAppContext";
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -20,7 +20,7 @@ const CarDetails = () => {
     setReturnDate,
   } = useAppContext();
 
-  const [car, setCar] = useState(null);
+  const car = cars.find((item) => item._id === id);
 
   const currency = import.meta.env.VITE_CURRENCY;
 
@@ -52,13 +52,6 @@ const CarDetails = () => {
       toast.error(error.response?.data?.message || error.message);
     }
   };
-
-  useEffect(() => {
-    if (cars.length > 0) {
-      const selectedCar = cars.find((item) => item._id === id);
-      setCar(selectedCar);
-    }
-  }, [cars, id]);
 
   if (!car) return <Loader />;
 

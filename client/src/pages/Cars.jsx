@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
 import CarCard from "../components/CarCard";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext } from "../context/useAppContext";
 import { useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { motion } from "motion/react";
@@ -17,67 +17,51 @@ const Cars = () => {
   const { cars, axios } = useAppContext();
 
   const [input, setInput] = useState("");
-  const [filteredCars, setFilteredCars] = useState([]);
   const [availableCars, setAvailableCars] = useState([]);
 
   const isSearchData =
     pickupLocation && pickupDate && returnDate;
 
-  const applyFilter = (baseCars) => {
-    if (!input.trim()) {
-      setFilteredCars(baseCars);
-      return;
-    }
+  useEffect(() => {
+    if (!isSearchData) return;
 
-    const filtered = baseCars.filter(
-      (car) =>
-        car.brand.toLowerCase().includes(input.toLowerCase()) ||
-        car.model.toLowerCase().includes(input.toLowerCase()) ||
-        car.category.toLowerCase().includes(input.toLowerCase()) ||
-        car.transmission.toLowerCase().includes(input.toLowerCase())
-    );
-
-    setFilteredCars(filtered);
-  };
-
-  const searchCarAvailability = async () => {
-    try {
-      const { data } = await axios.post(
-        "/api/bookings/check-availability",
-        {
+    let active = true;
+    const searchCarAvailability = async () => {
+      try {
+        const { data } = await axios.post("/api/bookings/check-availability", {
           location: pickupLocation,
           pickupDate,
           returnDate,
-        }
-      );
+        });
 
-      if (data.success) {
-        setAvailableCars(data.availableCars);
-        setFilteredCars(data.availableCars);
-
-        if (data.availableCars.length === 0) {
-          toast("No cars available");
+        if (!active) return;
+        if (data.success) {
+          setAvailableCars(data.availableCars);
+          if (data.availableCars.length === 0) toast("No cars available");
+        } else {
+          toast.error(data.message);
         }
-      } else {
-        toast.error(data.message);
+      } catch (error) {
+        if (active) toast.error(error.message);
       }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
+    };
 
-  useEffect(() => {
-    if (isSearchData) {
-      searchCarAvailability();
-    } else {
-      setAvailableCars(cars);
-      setFilteredCars(cars);
-    }
-  }, [cars, pickupLocation, pickupDate, returnDate]);
+    searchCarAvailability();
+    return () => {
+      active = false;
+    };
+  }, [axios, isSearchData, pickupDate, pickupLocation, returnDate]);
 
-  useEffect(() => {
-    applyFilter(availableCars);
-  }, [input, availableCars]);
+  const carsToShow = (isSearchData ? availableCars : cars).filter((car) => {
+    if (!input.trim()) return true;
+    const searchTerm = input.toLowerCase();
+    return (
+      car.brand.toLowerCase().includes(searchTerm) ||
+      car.model.toLowerCase().includes(searchTerm) ||
+      car.category.toLowerCase().includes(searchTerm) ||
+      car.transmission.toLowerCase().includes(searchTerm)
+    );
+  });
 
   return (
     <div>
@@ -129,11 +113,11 @@ const Cars = () => {
         className="px-6 md:px-16 lg:px-24 xl:px-32 mt-10"
       >
         <p className="text-gray-500 xl:px-20 max-w-7xl mx-auto">
-          Showing {filteredCars.length} Cars
+          Showing {carsToShow.length} Cars
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 xl:px-20 max-w-7xl mx-auto">
-          {filteredCars.map((car, index) => (
+          {carsToShow.map((car, index) => (
             <motion.div
               key={car._id}
               initial={{ opacity: 0, y: 20 }}
@@ -148,7 +132,7 @@ const Cars = () => {
           ))}
         </div>
 
-        {filteredCars.length === 0 && (
+        {carsToShow.length === 0 && (
           <div className="text-center py-20 text-gray-500">
             No cars found matching your search.
           </div>

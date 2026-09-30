@@ -1,32 +1,33 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { assets } from "../assets/assets";
 import Title from "../components/Title";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext } from "../context/useAppContext";
 
 const MyBookings = () => {
   const { axios, user, currency } = useAppContext();
   const [bookings, setBookings] = useState([]);
 
-  const fetchMyBookings = async () => {
-    try {
-      const { data } = await axios.get("/api/bookings/user");
+  useEffect(() => {
+    if (!user) return;
+
+    let active = true;
+    axios.get("/api/bookings/user").then(({ data }) => {
+      if (!active) return;
       if (data.success) {
         setBookings(data.bookings);
       } else {
         toast.error(data.message);
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
-    }
-  };
+    }).catch((error) => {
+      if (active) toast.error(error.response?.data?.message || error.message);
+    });
 
-  useEffect(() => {
-    if (user) {
-      fetchMyBookings();
-    }
-  }, [user]);
+    return () => {
+      active = false;
+    };
+  }, [axios, user]);
 
   const getStatusStyles = (status) => {
     switch (status) {

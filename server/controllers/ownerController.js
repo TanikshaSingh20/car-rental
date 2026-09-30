@@ -1,3 +1,4 @@
+import { toFile } from "@imagekit/nodejs";
 import imagekit from "../configs/imageKit.js";
 import Booking from "../models/Booking.js"
 import Car from "../models/Car.js";
@@ -34,18 +35,17 @@ export const addCar = async (req, res) => {
 
     const fileBuffer = fs.readFileSync(imageFile.path);
 
-    const response = await imagekit.upload({
-      file: fileBuffer,
+    const response = await imagekit.files.upload({
+      file: await toFile(fileBuffer, imageFile.originalname),
       fileName: imageFile.originalname,
       folder: "/cars",
     });
 
-    const optimizedImageUrl = imagekit.url({
-      path: response.filePath,
+    const optimizedImageUrl = imagekit.helper.buildSrc({
+      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+      src: response.filePath,
       transformation: [
-        { width: "1280" },
-        { quality: "auto" },
-        { format: "webp" },
+        { width: 1280, quality: "auto", format: "webp" },
       ],
     });
 
@@ -176,18 +176,17 @@ export const updateUserImage = async (req, res) => {
 
     const fileBuffer = fs.readFileSync(imageFile.path);
 
-    const response = await imagekit.upload({
-      file: fileBuffer,
+    const response = await imagekit.files.upload({
+      file: await toFile(fileBuffer, imageFile.originalname),
       fileName: imageFile.originalname,
       folder: "/users",
     });
 
-    const optimizedImageUrl = imagekit.url({
-      path: response.filePath,
+    const optimizedImageUrl = imagekit.helper.buildSrc({
+      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+      src: response.filePath,
       transformation: [
-        { width: "400" },
-        { quality: "auto" },
-        { format: "webp" },
+        { width: 400, quality: "auto", format: "webp" },
       ],
     });
 

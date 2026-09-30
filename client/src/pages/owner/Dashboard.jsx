@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { assets } from '../../assets/assets'
 import Title from '../../components/owner/Title'
-import { useAppContext } from '../../context/AppContext'
+import { useAppContext } from '../../context/useAppContext'
 import toast from 'react-hot-toast'
 
 const Dashboard = () => {
@@ -41,7 +41,7 @@ const Dashboard = () => {
     if (isOwner) {
       fetchDashboardData()
     }
-  }, []) // ✅ runs on every mount
+  }, [axios, isOwner])
 
   return (
     <div className='px-4 pt-10 md:px-10 flex-1'>

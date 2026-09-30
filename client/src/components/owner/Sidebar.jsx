@@ -112,10 +112,10 @@
 
 
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { ownerMenuLinks, assets } from "../../assets/assets";
-import { useAppContext } from "../../context/AppContext";
+import { useAppContext } from "../../context/useAppContext";
 import { toast } from "react-hot-toast";
 
 const Sidebar = () => {

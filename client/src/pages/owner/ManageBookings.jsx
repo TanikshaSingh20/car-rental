@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Title from '../../components/owner/Title';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from '../../context/useAppContext';
 import toast from 'react-hot-toast';
 
 const ManageBookings = () => {
@@ -35,8 +35,18 @@ const changeBookingStatus = async (bookingId, status) => {
 
 
   useEffect(() => {
-    fetchOwnerBookings();
-  }, []);
+    let active = true;
+    axios.get('/api/bookings/owner').then(({ data }) => {
+      if (!active) return;
+      data.success ? setBookings(data.bookings) : toast.error(data.message);
+    }).catch((error) => {
+      if (active) toast.error(error.message);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [axios]);
 
   return (
     <div className="w-full px-4 pt-10 md:px-10">
