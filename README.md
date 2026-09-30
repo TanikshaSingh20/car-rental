@@ -7,7 +7,7 @@ A car-rental web application with a React/Vite client and an Express API. The AP
 - GitHub repository: https://github.com/TanikshaSingh20/car-rental
 - Backend health: https://car-rental-server-two-rho.vercel.app/
 - Cars API: https://car-rental-server-two-rho.vercel.app/api/user/cars
-- Frontend: No public frontend URL was available when this README was written.
+- Frontend: https://car-rental-two-lilac.vercel.app
 
 The health URL should return `Server is running`. The cars API returns JSON with a `success` value and a `cars` array; an empty array means no cars have been listed yet.
 
